@@ -6,6 +6,11 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
+// For parsing application/json
+app.use(express.json());
+  
+// For parsing application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
 
 const {parsed:config} = dotenv.config();
 
@@ -65,7 +70,17 @@ app.get("/account/:email", (req,res) => {
 
 //Ceate an account
 app.post("/account", (req,res)=> {
-    pool.query(`INSERT INTO accounts(first_name,last_name,email,account_password, enrolled_courses) VALUES ('${req.first_name}', '${req.last_name}', '${req.email}',crypt('${req.password}', gen_salt('bf')), '{}');`)
+    pool.query(`INSERT INTO accounts(first_name,last_name,email,account_password, enrolled_courses) VALUES ('${req.body.first_name}', '${req.body.last_name}', '${req.body.email}',crypt('${req.body.account_password}', gen_salt('bf')), '{}',{},'','',{});`)
+})
+
+// INSERT INTO accounts(first_name,last_name,email,account_password, enrolled_courses, notes, pronouns,nickname, settings, classroom_contributions) VALUES ('Amanda', 'Nwadukwe', 'amandanwadukwe@gmail.com','1234', '{{1,1,2}}', '{}');
+
+//Update last page viewed
+app.post("/last-viewed-page", (req,res)=> {
+    console.log(req.body.activeCourseCode)
+    pool.query(`UPDATE accounts SET enrolled_courses='{{${req.body.activeCourseCode},${req.body.activeChapterNumber},${req.body.activePageNumber}}}' WHERE email='${req.body.email}';`)
+    .then(result => console.log("Result: ", result))
+    .catch(err => console.log("Error: ", err))
 })
 
 //--------------------- Courses ------------------------------
